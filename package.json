@@ -1,0 +1,30 @@
+{
+  "name": "tree-db",
+  "version": "1.0.0",
+  "description": "modified preorder tree traversal algorithm study",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cliens/tree-db.git"
+  },
+  "keywords": [
+    "db",
+    "modified",
+    "preorder",
+    "tree",
+    "traversal",
+    "algorithm"
+  ],
+  "author": "cliens",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cliens/tree-db/issues"
+  },
+  "homepage": "https://github.com/cliens/tree-db#readme",
+  "dependencies": {
+    "sequelize": "^3.18.0"
+  }
+}
