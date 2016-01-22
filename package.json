@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/cliens/tree-db#readme",
   "dependencies": {
+    "pg": "^4.4.3",
+    "pg-hstore": "^2.3.2",
     "sequelize": "^3.18.0"
   }
 }
