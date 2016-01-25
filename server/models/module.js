@@ -3,8 +3,9 @@
  */
 
 var Sequelize = require('sequelize');
+var sequelize = require('../core/db');
 
-var Module = Sequelize.define('tree-db', {
+var Module = module.exports = sequelize.define('module', {
 
     id: {
         type: Sequelize.UUID,

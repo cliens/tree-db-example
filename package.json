@@ -25,6 +25,10 @@
   },
   "homepage": "https://github.com/cliens/tree-db#readme",
   "dependencies": {
+    "body-parser": "^1.14.2",
+    "ejs": "^2.4.1",
+    "express": "^4.13.4",
+    "jquery": "^2.2.0",
     "pg": "^4.4.3",
     "pg-hstore": "^2.3.2",
     "sequelize": "^3.18.0"

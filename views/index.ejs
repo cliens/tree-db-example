@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body{font-family: "微软雅黑"}
+        li {list-style: none}
+        input { line-height: 26px; margin: 5px 10px;}
+    </style>
+</head>
+<body>
+<form action="/addUser" method="post">
+    <ul>
+        <li> <h3>新增用户:</h3></li>
+        <li><input type="text" name="name" placeholder="姓名"></li>
+        <li><input type="submit" value="添加"></li>
+    </ul>
+</form>
+<form action="/addModule" method="post">
+    <ul>
+        <li> <h3>新增模块:</h3></li>
+        <li><input type="text" name="name" placeholder="模块名"></li>
+        <li><input type="submit" value="添加"></li>
+    </ul>
+</form>
+</body>
+</html>
+<script src="../node_modules/jquery/dist/jquery.js"></script>
