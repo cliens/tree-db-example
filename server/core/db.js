@@ -4,6 +4,7 @@
 
 var Sequelize = require('sequelize');
 
+
 var sequelize = module.exports = new Sequelize('tree-db', 'postgres','123456', {
     host: 'localhost',
     dialect:'postgres',
@@ -13,5 +14,7 @@ var sequelize = module.exports = new Sequelize('tree-db', 'postgres','123456', {
         idle: 10000
     }
 });
+
+
 
 

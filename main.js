@@ -5,8 +5,23 @@
 var app = require('express')();
 var bodyParser = require('body-parser');
 var User = require('./server/models/User');
-var Module = require('./server/models/module');
+var Branch = require('./server/models/Branch');
+var initData = require('./server/data/initData');
+var sequelize = require('./server/core/db');
+var moduleView = require('./server/views/moduleView');
 
+app.set('views', './views');
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// 默认主页
+app.get('/',function(req, res) {
+    res.render('index')
+});
+
+
+// 获取指定用户
 app.get('/getUser', function(req, res) {
 
     User.findAll().then(function(dbUser){
@@ -15,16 +30,6 @@ app.get('/getUser', function(req, res) {
 
 
 });
-
-app.set('views', './views');
-app.set('view engine', 'ejs');
-
-app.get('/',function(req, res) {
-    res.render('index')
-});
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 
 // 新增用户
 app.post('/addUser', function(req, res, next) {
@@ -42,7 +47,7 @@ app.post('/addUser', function(req, res, next) {
 // 新增模块
 app.post('/addModule', function(req, res, next) {
     var data = req.body;
-    Module.create({
+    Branch.create({
         name: data.name,
         creatorId: data.creatorId,
         fatherId: data.fatherId
@@ -54,6 +59,46 @@ app.post('/addModule', function(req, res, next) {
 
 });
 
+// 根据id获取层级
+app.get('/getLayer', function(req, res, next) {
+
+    moduleView.getLayerById(req.query.id).then(function(result){
+        res.json({layer:result.count});
+    });
+});
+
+// 获取所有子孙节点
+app.get('/getChildren', function(req, res, next) {
+    moduleView.getChildrenById(req.query.id).then(function(result){
+        res.json(result);
+    });
+});
+
+// 获取所有子节点
+app.get('/getChild', function(req, res, next) {
+    moduleView.getChildById(req.query.id).then(function(result){
+        res.json(result);
+    });
+});
+
+// 获取叶子节点
+app.get('getLeaf', function(req, res, next) {
+    moduleView.getChildById(req.query.id).then(function(result){
+        res.json(result);
+    });
+});
+
+
+// 端口监听
 var server = app.listen(3000, function(){
     console.log('running on port 3000……');
+});
+
+sequelize.sync({force:true}).done(function(){
+    User.create({name:'cliens'});
+    var len = initData.length;
+    for(var i= 0; i < len;i++){
+        Branch.create(initData[i]);
+    }
+
 });

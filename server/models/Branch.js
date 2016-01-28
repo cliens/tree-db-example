@@ -4,8 +4,7 @@
 
 var Sequelize = require('sequelize');
 var sequelize = require('../core/db');
-
-var Module = module.exports = sequelize.define('module', {
+var Branch = module.exports = sequelize.define('branch', {
 
     id: {
         type: Sequelize.UUID,
@@ -48,3 +47,4 @@ var Module = module.exports = sequelize.define('module', {
 }, {
     tableName: 'T_ModuleInfo'
 });
+

@@ -21,7 +21,3 @@ var User = module.exports = sequelize.define('user', {
 },{
     tableName:'T_UserInfo'
 });
-
-sequelize.sync({force:true}).done(function() {
-;
-});
