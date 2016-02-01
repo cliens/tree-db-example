@@ -82,8 +82,8 @@ app.get('/getChild', function(req, res, next) {
 });
 
 // 获取叶子节点
-app.get('getLeaf', function(req, res, next) {
-    moduleView.getChildById(req.query.id).then(function(result){
+app.get('/getLeaf', function(req, res, next) {
+    moduleView.getLeafById(req.query.id).then(function(result){
         res.json(result);
     });
 });
@@ -94,11 +94,11 @@ var server = app.listen(3000, function(){
     console.log('running on port 3000……');
 });
 
+/*
 sequelize.sync({force:true}).done(function(){
     User.create({name:'cliens'});
     var len = initData.length;
     for(var i= 0; i < len;i++){
         Branch.create(initData[i]);
     }
-
-});
+});*/
