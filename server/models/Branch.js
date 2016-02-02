@@ -4,11 +4,17 @@
 
 var Sequelize = require('sequelize');
 var sequelize = require('../core/db');
-var Branch = module.exports = sequelize.define('branch', {
+var Branch = module.exports = sequelize.define('module', {
 
-    id: {
+/*    id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV1,
+        primaryKey: true,
+        field: 'PK_MI_Id',
+        comment: '主键'
+    },*/
+    id: {
+        type: Sequelize.INTEGER,
         primaryKey: true,
         field: 'PK_MI_Id',
         comment: '主键'
@@ -26,12 +32,20 @@ var Branch = module.exports = sequelize.define('branch', {
             key: 'PK_UI_Id'
         }
     },
-    fatherId: {
+/*    fatherId: {
         type: Sequelize.UUID,
         references: {
             model: 'T_ModuleInfo',
             key: 'PK_MI_Id'
         }
+    },*/
+    fatherId: {
+        type: Sequelize.INTEGER,
+        references: {
+            model: 'T_ModuleInfo',
+            key: 'PK_MI_Id'
+        },
+        filed: 'F_MI_FatherId'
     },
     lft: {
         type: Sequelize.INTEGER,
@@ -66,7 +80,7 @@ var Branch = module.exports = sequelize.define('branch', {
         }
     },
     setterMethods: {
-        gap: function (){
+        gap: function () {
             this.setDataValue('gap', this.rgt - this.lft);
         }
     }

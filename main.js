@@ -73,6 +73,9 @@ app.get('/getChildren', function(req, res, next) {
         res.json(result);
     });
 });
+/*moduleView.getChildrenById(5).then(function(result){
+    console.log(result);
+});*/
 
 // 获取所有子节点
 app.get('/getChild', function(req, res, next) {
@@ -80,6 +83,9 @@ app.get('/getChild', function(req, res, next) {
         res.json(result);
     });
 });
+/*moduleView.getChildById(3).then(function(result){
+    console.log(result);
+});*/
 
 // 获取叶子节点
 app.get('/getLeaf', function(req, res, next) {
@@ -87,15 +93,40 @@ app.get('/getLeaf', function(req, res, next) {
         res.json(result);
     });
 });
+/*moduleView.getLeafById(4).then(function(result){
+   console.log(result);
+});*/
 
+// 获取同级节点
+app.get('/getSibling', function(req, res, next) {
+    moduleView.getSiblingById(req.query.id).then(function(result){
+        res.json(result);
+    });
+});
+/*moduleView.getSiblingById(5).then(function(result){
+    console.log(result);
+});*/
+
+
+// 添加节点
+app.post('/addModule', function(req, res, next){
+
+    moduleView.insertRoot(req.body);
+
+});
+//moduleView.insertRoot({name:'公司'});
+//moduleView.insertChild(3,{name:'F:'});
+
+
+// 删除节点
+moduleView.deleteById(18);
 
 // 端口监听
 var server = app.listen(3000, function(){
     console.log('running on port 3000……');
 });
 
-/*
-sequelize.sync({force:true}).done(function(){
+/*sequelize.sync({force:true}).done(function(){
     User.create({name:'cliens'});
     var len = initData.length;
     for(var i= 0; i < len;i++){
