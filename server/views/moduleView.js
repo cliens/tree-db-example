@@ -240,12 +240,56 @@ var moduleView = module.exports = {
      * */
     moveTo: function(id, desParentId) {
 
-        var pre_lft, pre_rgt, des_lft, des_rgt, gap;
-
-
-
-
-
+        var pre_lft, pre_rgt, des_lft, des_rgt, gap, changed;
+        Branch.update({fatherId:desParentId},{
+            where:{
+                id:id
+            }
+        })
+          .then(function(result) {
+              pre_lft = result.lft;
+              pre_rgt = result.rgt;
+              gap = pre_rgt - pre_lft + 1;
+              return Branch.findById(desParentId)
+          })
+          .then(function(result) {
+              des_lft = result.lft;
+              des_rgt = result.rgt;
+              changed = pre_lft - des_rgt;
+              return Branch.update({
+                  lft: sequelize.literal('"F_MI_Left"' + gap)
+              },{
+                  where:{
+                      lft:{
+                          $between:[des_rgt, pre_lft]
+                      }
+                  }
+              })
+          }).then(function() {
+              return Branch.update({
+                  rgt: sequelize.literal('"F_MI_Right"' + gap)
+              }, {
+                  where:{
+                      rgt:{
+                          $between:[des_rgt, pre_lft]
+                      }
+                  }
+              })
+          }).then(function() {
+              return Branch.update({
+                  lft: sequelize.literal('"F_MI_Right" - ' + changed),
+                  rgt: sequelize.literal('"F_MI_Right" - ' + changed)
+              }, {
+                  where:{
+                      lft:{
+                          $gte: pre_lft
+                      },
+                      rgt:{
+                          $lte: pre_rgt
+                      }
+                  }
+              })
+          })
     }
 
 

@@ -119,8 +119,10 @@ app.post('/addModule', function(req, res, next){
 
 
 // 删除节点
-moduleView.deleteById(18);
+//moduleView.deleteById(18);
 
+// 移动节点
+moduleView.moveTo(7, 2);
 // 端口监听
 var server = app.listen(3000, function(){
     console.log('running on port 3000……');
