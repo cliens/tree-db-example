@@ -1,7 +1,7 @@
 {
   "name": "tree-db",
   "version": "1.0.0",
-  "description": "modified preorder tree traversal algorithm study",
+  "description": "modified preorder tree traversal algorithm study,sequelize ,postgre study",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
