@@ -73,7 +73,7 @@ app.get('/getChildren', function(req, res, next) {
         res.json(result);
     });
 });
-/*moduleView.getChildrenById(5).then(function(result){
+/*moduleView.getChildrenById(3).then(function(result){
     console.log(result);
 });*/
 
@@ -83,7 +83,7 @@ app.get('/getChild', function(req, res, next) {
         res.json(result);
     });
 });
-/*moduleView.getChildById(3).then(function(result){
+/*moduleView.getChildById(2).then(function(result){
     console.log(result);
 });*/
 
@@ -122,7 +122,7 @@ app.post('/addModule', function(req, res, next){
 //moduleView.deleteById(18);
 
 // 移动节点
-moduleView.moveTo(7, 2);
+moduleView.moveTo(14, 2);
 // 端口监听
 var server = app.listen(3000, function(){
     console.log('running on port 3000……');
