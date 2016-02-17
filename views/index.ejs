@@ -7,10 +7,12 @@
         body{font-family: "微软雅黑"}
         li {list-style: none}
         input { line-height: 26px; margin: 5px 10px;}
+        #tree-show a{cursor: pointer; display: inline-block;}
+        #tree-show a.active{color: red}
     </style>
 </head>
 <body>
-<form action="/addUser" method="post">
+<!--<form action="/addUser" method="post">
     <ul>
         <li> <h3>新增用户:</h3></li>
         <li><input type="text" name="name" placeholder="姓名"></li>
@@ -23,7 +25,126 @@
         <li><input type="text" name="name" placeholder="模块名"></li>
         <li><input type="submit" value="添加"></li>
     </ul>
-</form>
+</form>-->
+<div id="tree-show">
+<h2>结构树：</h2>
+</div>
 </body>
 </html>
-<script src="../node_modules/jquery/dist/jquery.js"></script>
+<script src="./jquery/dist/jquery.min.js"></script>
+<script>
+
+    var tmp= new Date().getTime();
+
+    window.onload = function() {
+
+        $.ajax({
+            methods:'get',
+            url:'getAll',
+            success: function(list) {
+//                $('#tree-show').html(showTree(list));
+                renderTree(list);
+            }
+        })
+
+    }
+
+    function renderTree(list) {
+
+        var len = list.length;
+        var node, root, template = '';
+        for(var i = 0;i < len; i++){
+            node = list[i];
+            if(!node.fatherId && node.fatherId != 0){
+                root = node;
+                break;
+            }
+        }
+        template = '<ul><li><a id="'+ root.id +'">' + root.name;
+        $('#tree-show').html(template);
+
+        addChildren(root.id)
+        function addChildren(id) {
+
+            var children = getChild(id), len = children.length;
+            if(len > 0) {
+                var ulStr = '<ul>';
+            }
+            for(var i = 0; i <len; i++){
+                node = children[i];
+                ulStr += '<li><a id="'+ node.id +'">' + node.name + '</a>';
+
+/*                if(i == len-1){
+                    ulStr += '</a>'
+                }*/
+            }
+            $(ulStr).appendTo('#'+id);
+            for(var j = 0; j< len; j++){
+                node = children[j];
+                addChildren(node.id);
+            }
+        }
+
+
+        function addAdd(id) {
+            ;
+        }
+
+        function getChild(id) {
+            var result = [];
+            for(var i = 0;i < len; i++){
+                node = list[i];
+                if(node.fatherId == id){
+                    result.push(node);
+                }
+            }
+            return result;
+        }
+
+    }
+
+
+    var tree = $('#tree-show')[0];
+    tree.onselectstart = function() {
+        return false;
+    };
+
+    tree.onmousedown = function(ev) {
+        $('a',tree).css({cursor:'move'});
+        var tarA = ev.target;
+        if(tarA.nodeName.toLowerCase() == 'a'){
+            var clone = tarA.cloneNode();
+            clone.style.position = 'absolute';
+            clone.style.color = 'gray';
+            $(clone).appendTo($(tree));
+            console.log(clone);
+            tree.onmousemove = function(ev) {
+
+                var tar = ev.target;
+                if(tar.nodeName.toLowerCase() == 'a'){
+                    tar.onmouseover = function() {
+                        console.log(tar.nodeName.toLowerCase());
+                        tar.style.borderBottom = '2px solid #ccc'
+                    };
+                    tar.onmouseout = function() {
+                        tar.style.borderBottom = '0';
+                    };
+                }
+
+
+            };
+        }
+
+    };
+    tree.onmouseup = function() {
+        $('a',tree).css({cursor:'pointer'});
+        tree.onmousemove = null;
+    };
+
+    $('a',tree).click(function(tar) {
+        tar.className = 'active';
+        console.log($(tar));
+        $(tar).addClass('active');
+    })
+
+</script>

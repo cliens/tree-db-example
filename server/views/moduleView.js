@@ -46,16 +46,37 @@ var moduleView = module.exports = {
             return Branch.findAll({
                 where: {
                     lft: {
-                        gte: _lft
+                        gt: _lft
                     },
                     rgt: {
-                        lte: _rgt
+                        lt: _rgt
                     }
+                },
+                attributes: {
+                    exclude:[
+                        'lft',
+                        'rgt'
+                    ]
                 }
             }).then(function (list) {
                 return list;
             });
         });
+    },
+    /*
+     * 获取所有节点
+     * */
+    getAll: function () {
+            return Branch.findAll({
+                attributes: {
+                    exclude:[
+                        'lft',
+                        'rgt'
+                    ]
+                }
+            }).then(function (list) {
+                return list;
+            });
     },
 
     /*
@@ -132,7 +153,7 @@ var moduleView = module.exports = {
         }).then(function (num) {
             return Branch.create({
                 name: data.name,
-                id: 1000,
+                //id: 0,
                 lft: 1,
                 rgt: (num + 1) * 2
             })
@@ -154,20 +175,20 @@ var moduleView = module.exports = {
     insertChild: function (parentId, data) {
         var _lft, _rgt;
 
+        var tmp= new Date().getTime();
         Branch.findById(parentId)
               .then(function (result) {
                   _lft = result.rgt;
                   _rgt = result.rgt + 1;
                   return Branch.create({
                       name: data.name,
-                      id: parseInt(Math.random() * 10000), // 随机id
+                      //id: tmp,
                       fatherId: result.id,
                       lft: _lft,
                       rgt: _rgt
                   })
               })
               .then(function (result) {
-
                   // 左值更新
                   return Branch.update({
                       lft: sequelize.literal('"F_MI_Left" + 2')
@@ -187,6 +208,9 @@ var moduleView = module.exports = {
                       where: {
                           rgt: {
                               $gte: _lft
+                          },
+                          lft: {
+                              $lt: _lft
                           }
                       }
                   });
@@ -386,7 +410,7 @@ var moduleView = module.exports = {
             , des_lft   // 目标父节点左值
             , des_rgt   // 目标父节点右值
             , gap   // 移动包含节点*2的值
-            , changed;  // 移动后变化大小
+            , changed;  // 移动后值的变化大小
 
         // 1.重置fatherId
         Branch.update({fatherId: desParentId}, {
@@ -402,9 +426,9 @@ var moduleView = module.exports = {
                   pre_rgt = result.rgt;
                   gap = pre_rgt - pre_lft + 1;
                   return Branch.findById(desParentId)
-              }).
+              })
               // 2.更新子孙左值
-              then(function (result) {
+              .then(function (result) {
                   des_lft = result.lft;
                   des_rgt = result.rgt;
                   changed = pre_lft - des_rgt;
@@ -518,5 +542,9 @@ var moduleView = module.exports = {
               })
 
     }
+    /*------------------------------------ 移动节点 ---------------- END ------------------*/
+
+
+
 
 };

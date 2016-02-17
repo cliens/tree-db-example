@@ -4,8 +4,8 @@
 
 
 var initData = module.exports = [
-        {name:'my computer', lft:1, rgt:40,id:1},
-        {name:'C:', lft:2, rgt:19,id:2},
+        {name:'my computer', lft:1, rgt:2},
+/*        {name:'C:', lft:2, rgt:19,id:2},
         {name:'Windows', lft:3, rgt:10,id:5},
         {name:'System', lft:4, rgt:5,id:11},
         {name:'System32', lft:6, rgt:7,id:12},
@@ -23,5 +23,5 @@ var initData = module.exports = [
         {name:'Javascript权威指南', lft:29, rgt:30,id:19},
         {name:'忍者秘籍', lft:31, rgt:32,id:20},
         {name:'Videos', lft:34, rgt:35,id:17},
-        {name:'Images', lft:36, rgt:37,id:18}
+        {name:'Images', lft:36, rgt:37,id:18}*/
     ];

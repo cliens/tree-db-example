@@ -1,8 +1,8 @@
 /**
  * Created by hk61 on 2016/1/22.
  */
-
-var app = require('express')();
+var express = require('express');
+var app = express();
 var bodyParser = require('body-parser');
 var User = require('./server/models/User');
 var Branch = require('./server/models/Branch');
@@ -15,7 +15,9 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(express.static(__dirname + '/node_modules'));
 // 默认主页
+
 app.get('/',function(req, res) {
     res.render('index')
 });
@@ -56,7 +58,6 @@ app.post('/addModule', function(req, res, next) {
     }).error(function(){
         res.render('index',{status:'添加失败!'})
     })
-
 });
 
 // 根据id获取层级
@@ -73,9 +74,16 @@ app.get('/getChildren', function(req, res, next) {
         res.json(result);
     });
 });
-/*moduleView.getChildrenById(3).then(function(result){
+moduleView.getChildrenById('5edbaea0-d555-11e5-ab2d-115a716f3b60').then(function(result){
     console.log(result);
-});*/
+});
+
+// 获取所有子孙节点
+app.get('/getAll', function(req, res, next) {
+    moduleView.getAll().then(function(result){
+        res.json(result);
+    });
+});
 
 // 获取所有子节点
 app.get('/getChild', function(req, res, next) {
@@ -115,14 +123,18 @@ app.post('/addModule', function(req, res, next){
 
 });
 //moduleView.insertRoot({name:'公司'});
-//moduleView.insertChild(3,{name:'F:'});
+//moduleView.insertChild('24cc3f90-d555-11e5-ba55-61e086be6e7d',{name:'F:'});
+//moduleView.insertChild('24cc3f90-d555-11e5-ba55-61e086be6e7d',{name:'C:'});
+//moduleView.insertChild('24cc3f90-d555-11e5-ba55-61e086be6e7d',{name:'D:'});
+//moduleView.insertChild('24cc3f90-d555-11e5-ba55-61e086be6e7d',{name:'E:'});
+//moduleView.insertChild('5edbaea0-d555-11e5-ab2d-115a716f3b60',{name:'Images'});
 
 
 // 删除节点
 //moduleView.deleteById(18);
 
 // 移动节点
-moduleView.moveTo(14, 2);
+//moduleView.moveTo('4b946bb0-d556-11e5-bcf2-ad44904b4f9b', 'ab423ed0-d555-11e5-9ddd-71352fa7adca');
 // 端口监听
 var server = app.listen(3000, function(){
     console.log('running on port 3000……');
@@ -131,7 +143,8 @@ var server = app.listen(3000, function(){
 /*sequelize.sync({force:true}).done(function(){
     User.create({name:'cliens'});
     var len = initData.length;
-    for(var i= 0; i < len;i++){
+/!*    for(var i= 0; i < len;i++){
         Branch.create(initData[i]);
-    }
+    }*!/
+    Branch.create(initData[0]);
 });*/

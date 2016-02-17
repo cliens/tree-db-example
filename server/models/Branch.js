@@ -6,19 +6,19 @@ var Sequelize = require('sequelize');
 var sequelize = require('../core/db');
 var Branch = module.exports = sequelize.define('module', {
 
-/*    id: {
+    id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV1,
         primaryKey: true,
         field: 'PK_MI_Id',
         comment: '主键'
-    },*/
-    id: {
-        type: Sequelize.INTEGER,
+    },
+/*    id: {
+        type: Sequelize.BIGINT,
         primaryKey: true,
         field: 'PK_MI_Id',
         comment: '主键'
-    },
+    },*/
     name: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -32,21 +32,21 @@ var Branch = module.exports = sequelize.define('module', {
             key: 'PK_UI_Id'
         }
     },
-/*    fatherId: {
+    fatherId: {
         type: Sequelize.UUID,
         references: {
             model: 'T_ModuleInfo',
             key: 'PK_MI_Id'
         }
-    },*/
-    fatherId: {
+    },
+/*    fatherId: {
         type: Sequelize.INTEGER,
         references: {
             model: 'T_ModuleInfo',
             key: 'PK_MI_Id'
         },
         filed: 'F_MI_FatherId'
-    },
+    },*/
     lft: {
         type: Sequelize.INTEGER,
         field: 'F_MI_Left',
@@ -60,7 +60,7 @@ var Branch = module.exports = sequelize.define('module', {
 
 }, {
     tableName: 'T_ModuleInfo',
-    getterMethods: {
+/*    getterMethods: {
         layer: function() {
             return Branch.count({
                 where:{
@@ -83,7 +83,7 @@ var Branch = module.exports = sequelize.define('module', {
         gap: function () {
             this.setDataValue('gap', this.rgt - this.lft);
         }
-    }
+    }*/
 });
 
 
