@@ -7,8 +7,14 @@
         body{font-family: "微软雅黑"}
         li {list-style: none}
         input { line-height: 26px; margin: 5px 10px;}
+        #tree-show { width: 30%; float: left;}
         #tree-show a{cursor: pointer; display: inline-block;}
         #tree-show a.active{color: red}
+        #tree-show .active a{color: #000}
+        
+        #tree-ctrl { width: 40%; float: left; border: 1px solid #ccc;; height:600px; padding: 20px;}
+        #tree-ctrl input[type="button"]{ padding: 5px 10px;}
+        #childrenShow b { margin-right: 15px; color: #666666;}
     </style>
 </head>
 <body>
@@ -27,7 +33,33 @@
     </ul>
 </form>-->
 <div id="tree-show">
-<h2>结构树：</h2>
+    <h2>结构树：</h2>
+</div>
+<div id="tree-ctrl">
+    <ul>
+        <li>
+            <input type="button" value="删除节点" id="deleteNode">
+        </li>
+        <li>
+            <label for="updateNode">更改节点名称</label>
+            <input type="text" id="updateNodeText">
+            <input type="button" id="updateNodeBtn" value="确定">
+        </li>
+        <li>
+            <label for="addNode">添加子节点</label>
+            <input type="text" id="addNodeName">
+            <input type="button" id="addNodeBtn" value="确定">
+        </li>
+        <li>
+            <label for="moveNode">移动节点到</label>
+            <select name="" id="moveNode">
+                <option value="">父节点</option>
+            </select>
+        </li>
+    </ul>
+    <b>当前节点所有子孙点 <span id="childrenCount"></span>：</b>
+    <p id="childrenShow">
+    </p>
 </div>
 </body>
 </html>
@@ -36,7 +68,9 @@
 
     var tmp= new Date().getTime();
 
-    window.onload = function() {
+    window.onload = updateTree;
+
+    function updateTree() {
 
         $.ajax({
             methods:'get',
@@ -60,7 +94,7 @@
                 break;
             }
         }
-        template = '<ul><li><a id="'+ root.id +'">' + root.name;
+        template = '<ul><li><a id="'+ root.id +'" data-name="' + root.name + '">' + root.name;
         $('#tree-show').html(template);
 
         addChildren(root.id)
@@ -72,22 +106,13 @@
             }
             for(var i = 0; i <len; i++){
                 node = children[i];
-                ulStr += '<li><a id="'+ node.id +'">' + node.name + '</a>';
-
-/*                if(i == len-1){
-                    ulStr += '</a>'
-                }*/
+                ulStr += '<li><a id="'+ node.id +'" data-name="' + node.name + '">' + node.name + '</a>';
             }
             $(ulStr).appendTo('#'+id);
             for(var j = 0; j< len; j++){
                 node = children[j];
                 addChildren(node.id);
             }
-        }
-
-
-        function addAdd(id) {
-            ;
         }
 
         function getChild(id) {
@@ -108,43 +133,130 @@
     tree.onselectstart = function() {
         return false;
     };
-
-    tree.onmousedown = function(ev) {
-        $('a',tree).css({cursor:'move'});
-        var tarA = ev.target;
-        if(tarA.nodeName.toLowerCase() == 'a'){
-            var clone = tarA.cloneNode();
-            clone.style.position = 'absolute';
-            clone.style.color = 'gray';
-            $(clone).appendTo($(tree));
-            console.log(clone);
-            tree.onmousemove = function(ev) {
-
-                var tar = ev.target;
-                if(tar.nodeName.toLowerCase() == 'a'){
-                    tar.onmouseover = function() {
-                        console.log(tar.nodeName.toLowerCase());
-                        tar.style.borderBottom = '2px solid #ccc'
-                    };
-                    tar.onmouseout = function() {
-                        tar.style.borderBottom = '0';
-                    };
-                }
-
-
-            };
+    var preV = null;
+    $(tree).click(function(ev) {
+        var tar = ev.target;
+        if(preV){
+            preV.className = '';
         }
+        if(tar.nodeName.toLowerCase() == 'a'){
 
-    };
-    tree.onmouseup = function() {
-        $('a',tree).css({cursor:'pointer'});
-        tree.onmousemove = null;
-    };
+            tar.className = 'active';
+            preV = tar;
+            showChildren(tar);
+            updateSelection(tar);
+            $('#updateNodeText').val(tar.dataset.name);
 
-    $('a',tree).click(function(tar) {
-        tar.className = 'active';
-        console.log($(tar));
-        $(tar).addClass('active');
+        }
     })
+
+
+    function showChildren(node) {
+
+        $.ajax({
+            url:'getChildren?id=' + node.id,
+            methods: 'get',
+            success: function(list) {
+                var showBox = $('#childrenShow');
+                var i = 0 , len = list.length, tmp = '';
+                for(;i<len; i++){
+                    tmp += '<b>' + list[i].name + '</b>';
+                }
+                showBox.html(tmp);
+                $('#childrenCount').html('(' + len + ')')
+            }
+        })
+
+    }
+
+    function updateSelection(node) {
+
+        $.ajax({
+            url:'getOtherBranchById?id=' + node.id,
+            methods: 'get',
+            success: function(list) {
+                var i = 0, len = list.length, tmp ='';
+                for(; i<len; i++){
+                    tmp += '<option value="'+ list[i].id +'">' + list[i].name + '</option>'
+                }
+                $('#moveNode').html(tmp);
+            }
+        })
+
+    }
+
+    $('#moveNode')[0].onchange = function() {
+        var selfId = $('.active',tree).attr('id');
+        var newId = this.value;
+        console.log(selfId,newId)
+        $.ajax({
+            url:'moveNode?id=' + selfId + '&newParentId=' + newId,
+            methods: 'get',
+            success: function(list) {
+                var i = 0, len = list.length, tmp ='';
+                for(; i<len; i++){
+                    tmp += '<option value="'+ list[i].id +'">' + list[i].name + '</option>'
+                }
+                $('#moveNode').html(tmp);
+                window.location.reload();
+            }
+        })
+
+    }
+
+
+    $('#deleteNode').click(deleteNode);
+    function deleteNode() {
+        var selfId = $('.active',tree).attr('id');
+        $.ajax({
+            url:'deleteById?id=' + selfId,
+            methods: 'get',
+            success: function(list) {
+                var i = 0, len = list.length, tmp ='';
+                for(; i<len; i++){
+                    tmp += '<option value="'+ list[i].id +'">' + list[i].name + '</option>'
+                }
+                $('#moveNode').html(tmp);
+                window.location.reload();
+            }
+        })
+    }
+
+    $('#addNodeBtn').click(addNode);
+    function addNode() {
+        var
+            nodeName = $('#addNodeName').val()
+            ,fatherId = $('.active',tree).attr('id');
+
+        $.ajax({
+            url:'addModule',
+            type: 'post',
+            data: {
+                name: nodeName,
+                creatorId:'',
+                fatherId: fatherId
+            },
+            success: function(data) {
+                window.location.reload();
+            }
+        })
+
+    }
+
+    $('#updateNodeBtn').click(function() {
+
+        $.ajax({
+            url:'updateNode',
+            type: 'post',
+            data: {
+                id: $('.active',tree).attr('id'),
+                name: $('#updateNodeText').val()
+            },
+            success: function(data) {
+                window.location.reload();
+            }
+        })
+
+    });
 
 </script>

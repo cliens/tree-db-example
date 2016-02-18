@@ -13,12 +13,6 @@ var Branch = module.exports = sequelize.define('module', {
         field: 'PK_MI_Id',
         comment: '主键'
     },
-/*    id: {
-        type: Sequelize.BIGINT,
-        primaryKey: true,
-        field: 'PK_MI_Id',
-        comment: '主键'
-    },*/
     name: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -39,14 +33,6 @@ var Branch = module.exports = sequelize.define('module', {
             key: 'PK_MI_Id'
         }
     },
-/*    fatherId: {
-        type: Sequelize.INTEGER,
-        references: {
-            model: 'T_ModuleInfo',
-            key: 'PK_MI_Id'
-        },
-        filed: 'F_MI_FatherId'
-    },*/
     lft: {
         type: Sequelize.INTEGER,
         field: 'F_MI_Left',
@@ -60,30 +46,30 @@ var Branch = module.exports = sequelize.define('module', {
 
 }, {
     tableName: 'T_ModuleInfo',
-/*    getterMethods: {
-        layer: function() {
-            return Branch.count({
-                where:{
-                    lft:{
-                        lte:this.lft
-                    },
-                    rgt:{
-                        gte:this.rgt
-                    }
-                }
-            }).then(function(list) {
-                return list;
-            });
-        },
-        gap: function() {
-            return this.rgt - this.lft;
-        }
-    },
-    setterMethods: {
-        gap: function () {
-            this.setDataValue('gap', this.rgt - this.lft);
-        }
-    }*/
+    //getterMethods: {
+    //    layer: function() {
+    //        return Branch.count({
+    //            where:{
+    //                lft:{
+    //                    lte:this.lft
+    //                },
+    //                rgt:{
+    //                    gte:this.rgt
+    //                }
+    //            }
+    //        }).then(function(list) {
+    //            return list;
+    //        });
+    //    },
+    //    gap: function() {
+    //        return this.rgt - this.lft;
+    //    }
+    //},
+    //setterMethods: {
+    //    gap: function () {
+    //        this.setDataValue('gap', this.rgt - this.lft);
+    //    }
+    //}
 });
 
 

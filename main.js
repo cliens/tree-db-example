@@ -4,10 +4,9 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+
 var User = require('./server/models/User');
-var Branch = require('./server/models/Branch');
 var initData = require('./server/data/initData');
-var sequelize = require('./server/core/db');
 var moduleView = require('./server/views/moduleView');
 
 app.set('views', './views');
@@ -16,8 +15,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(express.static(__dirname + '/node_modules'));
-// 默认主页
 
+// 默认主页
 app.get('/',function(req, res) {
     res.render('index')
 });
@@ -25,17 +24,13 @@ app.get('/',function(req, res) {
 
 // 获取指定用户
 app.get('/getUser', function(req, res) {
-
     User.findAll().then(function(dbUser){
         res.send(dbUser);
     });
-
-
 });
 
 // 新增用户
 app.post('/addUser', function(req, res, next) {
-
     User.create({
         name:req.body.name
     }).then(function() {
@@ -43,30 +38,23 @@ app.post('/addUser', function(req, res, next) {
     }).error(function(){
         res.render('index',{status:'添加失败!'})
     })
-
 });
 
-// 新增模块
-app.post('/addModule', function(req, res, next) {
-    var data = req.body;
-    Branch.create({
-        name: data.name,
-        creatorId: data.creatorId,
-        fatherId: data.fatherId
-    }).then(function() {
-        res.render('index',{status:'添加成功!'})
-    }).error(function(){
-        res.render('index',{status:'添加失败!'})
-    })
-});
 
 // 根据id获取层级
 app.get('/getLayer', function(req, res, next) {
-
     moduleView.getLayerById(req.query.id).then(function(result){
         res.json({layer:result.count});
     });
 });
+
+// 获取所有节点
+app.get('/getAll', function(req, res, next) {
+    moduleView.getAll().then(function(result){
+        res.json(result);
+    });
+});
+
 
 // 获取所有子孙节点
 app.get('/getChildren', function(req, res, next) {
@@ -74,16 +62,9 @@ app.get('/getChildren', function(req, res, next) {
         res.json(result);
     });
 });
-moduleView.getChildrenById('5edbaea0-d555-11e5-ab2d-115a716f3b60').then(function(result){
+/*moduleView.getChildrenById('ef32a620-d5e1-11e5-a0a7-91805fbb8df5').then(function(result){
     console.log(result);
-});
-
-// 获取所有子孙节点
-app.get('/getAll', function(req, res, next) {
-    moduleView.getAll().then(function(result){
-        res.json(result);
-    });
-});
+});*/
 
 // 获取所有子节点
 app.get('/getChild', function(req, res, next) {
@@ -95,6 +76,7 @@ app.get('/getChild', function(req, res, next) {
     console.log(result);
 });*/
 
+
 // 获取叶子节点
 app.get('/getLeaf', function(req, res, next) {
     moduleView.getLeafById(req.query.id).then(function(result){
@@ -104,6 +86,7 @@ app.get('/getLeaf', function(req, res, next) {
 /*moduleView.getLeafById(4).then(function(result){
    console.log(result);
 });*/
+
 
 // 获取同级节点
 app.get('/getSibling', function(req, res, next) {
@@ -116,31 +99,61 @@ app.get('/getSibling', function(req, res, next) {
 });*/
 
 
+// 获取非当前节点父节点下的节点，用于移动节点
+app.get('/getOtherBranchById', function(req, res, next) {
+    moduleView.getOtherBranchById(req.query.id).then(function(result){
+        res.json(result);
+    });
+});
+
+
 // 添加节点
 app.post('/addModule', function(req, res, next){
+    var data = req.body;
+    moduleView.insertChild(data.fatherId,{name:data.name}).then(function() {
+        res.send({status:'ok'});
+    });
+});
+//moduleView.insertChild('38a55ae0-d557-11e5-a270-a3aedd6430b8',{name:'F:'});
 
-    moduleView.insertRoot(req.body);
 
+// 更改节点信息
+app.post('/updateNode', function(req, res, next){
+    var data = req.body;
+    moduleView.updateNodeInfo(data).then(function(){
+        res.send({status:'ok'});
+    });
 });
 //moduleView.insertRoot({name:'公司'});
-//moduleView.insertChild('24cc3f90-d555-11e5-ba55-61e086be6e7d',{name:'F:'});
-//moduleView.insertChild('24cc3f90-d555-11e5-ba55-61e086be6e7d',{name:'C:'});
-//moduleView.insertChild('24cc3f90-d555-11e5-ba55-61e086be6e7d',{name:'D:'});
-//moduleView.insertChild('24cc3f90-d555-11e5-ba55-61e086be6e7d',{name:'E:'});
-//moduleView.insertChild('5edbaea0-d555-11e5-ab2d-115a716f3b60',{name:'Images'});
+
+// 移动节点
+app.get('/moveNode', function(req, res, next){
+    moduleView.moveTo(req.query.id, req.query.newParentId).then(function() {
+        res.send({status:'ok'});
+    });
+});
+//moduleView.moveTo('81c768d1-d5e3-11e5-9006-41570f1ba434', 'dd00c040-d5e1-11e5-b366-b1e66d7850e6');
 
 
 // 删除节点
-//moduleView.deleteById(18);
+app.get('/deleteById', function(req, res, next){
+    moduleView.deleteById(req.query.id).then(function() {
+        res.send({status:'ok'});
+    });
+});
+//moduleView.deleteById('17825fd1-d5e7-11e5-a96a-2be7074c0884');
 
-// 移动节点
-//moduleView.moveTo('4b946bb0-d556-11e5-bcf2-ad44904b4f9b', 'ab423ed0-d555-11e5-9ddd-71352fa7adca');
+
 // 端口监听
 var server = app.listen(3000, function(){
     console.log('running on port 3000……');
 });
 
-/*sequelize.sync({force:true}).done(function(){
+
+// 是否强制刷新数据库
+/*var sequelize = require('./server/core/db');
+var Branch = require('./server/models/Branch');
+sequelize.sync({force:true}).done(function(){
     User.create({name:'cliens'});
     var len = initData.length;
 /!*    for(var i= 0; i < len;i++){
