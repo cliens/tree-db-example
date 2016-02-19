@@ -15,9 +15,15 @@ var Branch = module.exports = sequelize.define('module', {
     },
     name: {
         type: Sequelize.STRING,
-        allowNull: false,
         field: 'F_MI_Name',
-        comment: '模块名称'
+        comment: '模块名称',
+        validate: {
+            isEmpty: function(val) {
+                if(!val){
+                    throw new Error('can\'t be empty!');
+                }
+            }
+        }
     },
     creatorId: {
         type: Sequelize.UUID,

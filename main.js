@@ -110,11 +110,26 @@ app.get('/getOtherBranchById', function(req, res, next) {
 // 添加节点
 app.post('/addModule', function(req, res, next){
     var data = req.body;
-    moduleView.insertChild(data.fatherId,{name:data.name}).then(function() {
-        res.send({status:'ok'});
-    });
+    if(!!data.fatherId){
+        moduleView.insertChild(data.fatherId,{name:data.name}).then(function() {
+            res.send({status:'ok'});
+        });
+    }else{
+        var hasNode;
+        moduleView.getAll().then(function(result) {
+            hasNode = result.length > 0;
+            if(!hasNode){
+                moduleView.insertRoot({name:data.name}).then(function() {
+                    res.send({status:'ok'});
+                });
+            }else{
+                res.status(400).send('Error:A fatherId is must!');
+            }
+        }) ;
+    }
 });
 //moduleView.insertChild('38a55ae0-d557-11e5-a270-a3aedd6430b8',{name:'F:'});
+//moduleView.insertRoot({name:'公司'});
 
 
 // 更改节点信息
@@ -124,7 +139,6 @@ app.post('/updateNode', function(req, res, next){
         res.send({status:'ok'});
     });
 });
-//moduleView.insertRoot({name:'公司'});
 
 // 移动节点
 app.get('/moveNode', function(req, res, next){

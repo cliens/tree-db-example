@@ -45,7 +45,10 @@ var moduleView = module.exports = {
                     'lft',
                     'rgt'
                 ]
-            }
+            },
+            order: [
+                ['F_MI_Left']
+            ]
         }).then(function (list) {
             return list;
         });
@@ -83,33 +86,34 @@ var moduleView = module.exports = {
      * */
     getOtherBranchById: function (id) {
 
+        if(!id) return;
         return Branch.findById(id).then(function (list) {
-            var _fatherId = list.fatherId;
-            return Branch.findById(_fatherId);
-        })
-        .then(function (list) {
-            var _lft = list.lft;
-            var _rgt = list.rgt;
+            var _lft = list.lft
+                , _rgt = list.rgt;
 
-            return Branch.findAll({
-                where: {
-                    $not:{
-                        lft: {
-                            gte: _lft
-                        },
-                        rgt: {
-                            lte: _rgt
-                        }
-                    }
-                },
-                attributes: {
-                    exclude:[
-                        'lft',
-                        'rgt'
-                    ]
-                }
-            })
-        });
+                 return Branch.findAll({
+                     where: {
+                         $not:{
+                             lft: {
+                                 gte: _lft
+                             },
+                             rgt: {
+                                 lte: _rgt
+                             }
+                         }
+                     },
+                     attributes: {
+                         exclude:[
+                             'lft',
+                             'rgt'
+                         ]
+                     },
+                     order: [
+                         ['F_MI_Left']
+                     ]
+                 })
+
+        })
     },
 
 
@@ -203,7 +207,7 @@ var moduleView = module.exports = {
      * */
     insertRoot: function (data) {
 
-        Branch.update({
+        return Branch.update({
             lft: sequelize.literal('"F_MI_Left" + 1'),
             rgt: sequelize.literal('"F_MI_Right" + 1')
         }, {

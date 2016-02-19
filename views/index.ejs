@@ -53,7 +53,7 @@
         <li>
             <label for="moveNode">移动节点到</label>
             <select name="" id="moveNode">
-                <option value="">父节点</option>
+                <!--<option value="">父节点</option>-->
             </select>
         </li>
     </ul>
@@ -66,27 +66,31 @@
 <script src="./jquery/dist/jquery.min.js"></script>
 <script>
 
-    var tmp= new Date().getTime();
+    var tree = $('#tree-show')[0];
 
     window.onload = updateTree;
-
     function updateTree() {
 
         $.ajax({
             methods:'get',
             url:'getAll',
             success: function(list) {
-//                $('#tree-show').html(showTree(list));
                 renderTree(list);
             }
         })
 
     }
 
+    /*
+    * 渲染树
+    * @Para [Array] list 对象数组
+    * */
     function renderTree(list) {
+        var
+                len = list.length
+                , node, root, template = '';
 
-        var len = list.length;
-        var node, root, template = '';
+        if(len == 0) return;
         for(var i = 0;i < len; i++){
             node = list[i];
             if(!node.fatherId && node.fatherId != 0){
@@ -94,29 +98,41 @@
                 break;
             }
         }
+
         template = '<ul><li><a id="'+ root.id +'" data-name="' + root.name + '">' + root.name;
         $('#tree-show').html(template);
 
         addChildren(root.id)
         function addChildren(id) {
+            var
+                    children = getChildren(id)
+                     , len = children.length;
 
-            var children = getChild(id), len = children.length;
             if(len > 0) {
                 var ulStr = '<ul>';
             }
+
             for(var i = 0; i <len; i++){
                 node = children[i];
                 ulStr += '<li><a id="'+ node.id +'" data-name="' + node.name + '">' + node.name + '</a>';
             }
+
             $(ulStr).appendTo('#'+id);
             for(var j = 0; j< len; j++){
                 node = children[j];
                 addChildren(node.id);
             }
+
         }
 
-        function getChild(id) {
+        /*
+        * 获取指定节点下的子节点
+        * @Para [String] id 节点id
+        * @return [Array] result 子节点数组
+        * */
+        function getChildren(id) {
             var result = [];
+
             for(var i = 0;i < len; i++){
                 node = list[i];
                 if(node.fatherId == id){
@@ -128,29 +144,30 @@
 
     }
 
-
-    var tree = $('#tree-show')[0];
-    tree.onselectstart = function() {
-        return false;
-    };
     var preV = null;
+    // 单击选择节点
     $(tree).click(function(ev) {
         var tar = ev.target;
+
         if(preV){
             preV.className = '';
         }
-        if(tar.nodeName.toLowerCase() == 'a'){
 
+        if(tar.nodeName.toLowerCase() == 'a'){
             tar.className = 'active';
             preV = tar;
             showChildren(tar);
             updateSelection(tar);
             $('#updateNodeText').val(tar.dataset.name);
-
         }
+
     })
 
 
+    /*
+    * 展示当前节点下的子孙节点到页面
+    * @Para [ELEMENT] node DOM节点
+    * */
     function showChildren(node) {
 
         $.ajax({
@@ -169,6 +186,10 @@
 
     }
 
+    /*
+    * 更新对应节点可以移动到的节点列表
+    * @Para [ELEMENT] node DOM节点
+    * */
     function updateSelection(node) {
 
         $.ajax({
@@ -185,10 +206,12 @@
 
     }
 
+    // 移动节点
     $('#moveNode')[0].onchange = function() {
-        var selfId = $('.active',tree).attr('id');
-        var newId = this.value;
-        console.log(selfId,newId)
+        var
+            selfId = $('.active',tree).attr('id')
+            ,newId = this.value;
+
         $.ajax({
             url:'moveNode?id=' + selfId + '&newParentId=' + newId,
             methods: 'get',
@@ -204,10 +227,10 @@
 
     }
 
-
-    $('#deleteNode').click(deleteNode);
-    function deleteNode() {
+    // 删除节点
+    $('#deleteNode').click(function() {
         var selfId = $('.active',tree).attr('id');
+
         $.ajax({
             url:'deleteById?id=' + selfId,
             methods: 'get',
@@ -220,13 +243,14 @@
                 window.location.reload();
             }
         })
-    }
 
-    $('#addNodeBtn').click(addNode);
-    function addNode() {
+    });
+
+    // 添加子节点
+    $('#addNodeBtn').click(function() {
         var
-            nodeName = $('#addNodeName').val()
-            ,fatherId = $('.active',tree).attr('id');
+                nodeName = $('#addNodeName').val()
+                ,fatherId = $('.active',tree).attr('id') || null;
 
         $.ajax({
             url:'addModule',
@@ -241,8 +265,9 @@
             }
         })
 
-    }
+    });
 
+    // 更改节点名称
     $('#updateNodeBtn').click(function() {
 
         $.ajax({
@@ -258,5 +283,10 @@
         })
 
     });
+
+    // 阻止选择文本的默认行为
+    tree.onselectstart = function() {
+        return false;
+    };
 
 </script>

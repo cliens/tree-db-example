@@ -12,7 +12,8 @@ var sequelize = module.exports = new Sequelize('tree-db', 'postgres','123456', {
         max: 5,
         min: 0,
         idle: 10000
-    }
+    },
+    typeValidation:true
 });
 
 
