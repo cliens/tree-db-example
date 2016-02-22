@@ -76,6 +76,7 @@ var Branch = module.exports = sequelize.define('module', {
     //        this.setDataValue('gap', this.rgt - this.lft);
     //    }
     //}
+
 });
 
 

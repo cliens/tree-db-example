@@ -26,6 +26,7 @@
   "homepage": "https://github.com/cliens/tree-db#readme",
   "dependencies": {
     "body-parser": "^1.14.2",
+    "continuation-local-storage": "^3.1.6",
     "ejs": "^2.4.1",
     "express": "^4.13.4",
     "jquery": "^2.2.0",

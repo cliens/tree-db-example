@@ -4,6 +4,8 @@
 
 var sequelize = require('../core/db');
 var Branch = require('../models/Branch');
+/*var ns = require('continuation-local-storage').createNamespace('dbTree');
+sequelize.cls = ns;*/
 
 var moduleView = module.exports = {
 
@@ -48,7 +50,8 @@ var moduleView = module.exports = {
             },
             order: [
                 ['F_MI_Left']
-            ]
+            ],
+            raw: true
         }).then(function (list) {
             return list;
         });
@@ -207,31 +210,40 @@ var moduleView = module.exports = {
      * */
     insertRoot: function (data) {
 
-        return Branch.update({
-            lft: sequelize.literal('"F_MI_Left" + 1'),
-            rgt: sequelize.literal('"F_MI_Right" + 1')
-        }, {
-            where: {
-                lft: {
-                    $gte: 1
-                }
-            }
-        }).then(function (results) {
-            return Branch.count()
-        }).then(function (num) {
-            return Branch.create({
-                name: data.name,
-                //id: 0,
-                lft: 1,
-                rgt: (num + 1) * 2
-            })
-        }).then(function (results) {
-            Branch.update({fatherId: results.id}, {
+        return sequelize.transaction().then(function(t) {
+            return Branch.update({
+                lft: sequelize.literal('"F_MI_Left" + 1'),
+                rgt: sequelize.literal('"F_MI_Right" + 1')
+            }, {
                 where: {
-                    lft: 2
-                }
+                    lft: {
+                        $gte: 1
+                    }
+                },
+                transaction: t
+            }).then(function (results) {
+                return Branch.count()
+            }).then(function (num) {
+                return Branch.create({
+                    name: data.name,
+                    //id: 0,
+                    lft: 1,
+                    rgt: (num + 1) * 2
+                },{
+                    transaction:t
+                })
+            }).then(function (results) {
+                return Branch.update({fatherId: results.id}, {
+                    where: {
+                        lft: 2
+                    },
+                    transaction: t
+                })
             })
+             .then( t.commit.bind(t) )
+             .catch( t.rollback.bind(t) )
         })
+
 
     },
 
@@ -244,44 +256,51 @@ var moduleView = module.exports = {
     insertChild: function (parentId, data) {
         var _rgt;
 
-        return Branch.findById(parentId)
-              .then(function (result) {
-                  _rgt = result.rgt;
-              })
-              .then(function () {
-                  // 左值更新
-                  return Branch.update({
-                      lft: sequelize.literal('"F_MI_Left" + 2')
-                  }, {
-                      where: {
-                          lft: {
-                              $gt: _rgt
-                          }
-                      }
-                  });
-              })
-              .then(function () {
-                  // 右值更新
-                  Branch.update({
-                      rgt: sequelize.literal('"F_MI_Right" + 2')
-                  }, {
-                      where: {
-                          rgt: {
-                              $gte: _rgt
-                          }
-                      }
-                  });
-              })
-              .then(function () {
-                  // 插入
-                  return Branch.create({
-                      name: data.name,
-                      fatherId: parentId,
-                      lft: _rgt,
-                      rgt: _rgt + 1
-                  })
-              })
-
+        return sequelize.transaction().then(function(t) {
+            return Branch.findById(parentId)
+                 .then(function (result) {
+                     _rgt = result.rgt;
+                 })
+                 .then(function () {
+                     // 左值更新
+                     return Branch.update({
+                         lft: sequelize.literal('"F_MI_Left" + 2')
+                     }, {
+                         where: {
+                             lft: {
+                                 $gt: _rgt
+                             }
+                         },
+                         transaction: t
+                     });
+                 })
+                 .then(function () {
+                     // 右值更新
+                     Branch.update({
+                         rgt: sequelize.literal('"F_MI_Right" + 2')
+                     }, {
+                         where: {
+                             rgt: {
+                                 $gte: _rgt
+                             }
+                         },
+                         transaction: t
+                     });
+                 })
+                 .then(function () {
+                     // 插入
+                     return Branch.create({
+                         name: data.name,
+                         fatherId: parentId,
+                         lft: _rgt,
+                         rgt: _rgt + 1
+                     },{
+                         transaction: t
+                     })
+                 })
+                 .then( t.commit.bind(t) )
+                 .catch( t.rollback.bind(t) )
+        })
     },
 
 
@@ -294,49 +313,55 @@ var moduleView = module.exports = {
      * */
     deleteById: function (id) {
         var _lft, _rgt, gap;
+        return sequelize.transaction().then(function(t) {
+            return Branch.findById(id)
+                 .then(function (result) {
+                     _lft = result.lft;
+                     _rgt = result.rgt;
 
-        return Branch.findById(id)
-              .then(function (result) {
-                  _lft = result.lft;
-                  _rgt = result.rgt;
+                     return Branch.destroy({
+                         where: {
+                             lft: {
+                                 gte: _lft
+                             },
+                             rgt: {
+                                 lte: _rgt
+                             }
+                         },
+                         transaction: t
+                     })
+                 })
+                 .then(function () {
+                     gap = _rgt - _lft + 1;
+                     // 更新左值
+                     return Branch.update({
+                              lft: sequelize.literal('"F_MI_Left" -' + gap)
+                          }, {
+                              where: {
+                                  lft: {
+                                      $gt: _lft
+                                  }
+                              },
+                              transaction: t
+                          })
+                          .then(function() {
+                              // 更新右值
+                              return Branch.update({
+                                  rgt: sequelize.literal('"F_MI_Right" -' + gap)
+                              }, {
+                                  where: {
+                                      rgt: {
+                                          $gt: _rgt
+                                      }
+                                  },
+                                  transaction: t
+                              })
+                          });
 
-                  return Branch.destroy({
-                      where: {
-                          lft: {
-                              gte: _lft
-                          },
-                          rgt: {
-                              lte: _rgt
-                          }
-                      }
-                  })
-              })
-              .then(function () {
-                  gap = _rgt - _lft + 1;
-                  // 更新左值
-                  return Branch.update({
-                      lft: sequelize.literal('"F_MI_Left" -' + gap)
-                  }, {
-                      where: {
-                          lft: {
-                              $gt: _lft
-                          }
-                      }
-                  })
-                  .then(function() {
-                      // 更新右值
-                      return Branch.update({
-                          rgt: sequelize.literal('"F_MI_Right" -' + gap)
-                      }, {
-                          where: {
-                              rgt: {
-                                  $gt: _rgt
-                              }
-                          }
-                      })
-                  });
-
-              })
+                 })
+                 .then( t.commit.bind(t) )
+                 .catch( t.rollback.bind(t) )
+        })
 
     },
 
@@ -360,136 +385,149 @@ var moduleView = module.exports = {
             , changed;  // 移动后值的变化大小
 
         // 1.重置fatherId
-        return Branch.update({fatherId: desParentId}, {
-                  where: {
-                      id: id
-                  }
-              })
-              .then(function () {
-                  return Branch.findById(id)
-              })
-              .then(function (result) {
-                  pre_lft = result.lft;
-                  pre_rgt = result.rgt;
-                  gap = pre_rgt - pre_lft + 1;
-                  return Branch.findById(desParentId)
-              })
-              // 2.更新子孙左值
-              .then(function (result) {
-                  des_lft = result.lft;
-                  des_rgt = result.rgt;
-                  changed = pre_lft - des_rgt;
-                  changed = changed < 0 ? changed + gap : changed;
-                  return Branch.update({
-                      lft: sequelize.literal('"F_MI_Left" - ' + changed)
-                  }, {
-                      where: {
-                          lft: {
-                              $between:[pre_lft, pre_rgt]
-                          }
-                      }
-                  })
-              })
-              // 3.更新被影响节点的左值
-              .then(function () {
-                  if( changed > 0 ){
-                      return Branch.update({
-                          lft: sequelize.literal('"F_MI_Left" + ' + gap)
-                      }, {
-                          where: {
-                              lft: {
-                                  $and:[
-                                      {$gt: des_rgt},
-                                      {$lt: pre_lft}
-                                  ]
-                              },
-                              rgt: {
-                                  $or: [
-                                      {$gt: pre_rgt},
-                                      {$lt: pre_lft}
-                                  ]
-                              }
-                          }
-                      })
-                  }else{
-                      return Branch.update({
-                          lft: sequelize.literal('"F_MI_Left" - ' + gap)
-                      }, {
-                          where: {
-                              lft: {
-                                  $and:[
-                                      {$gt: pre_rgt},
-                                      {$lt: des_rgt}
-                                  ]
-                              },
-                              rgt: {
-                                  $notBetween: [pre_lft, pre_rgt]
-                              }
-                          }
-                      })
-                  }
-              })
-              // 4.更新子节点右值
-              .then(function () {
-                return  changed > 0 ?
-                      Branch.update({
-                          rgt: sequelize.literal('"F_MI_Right" - ' + changed)
-                      }, {
-                          where: {
-                              lft: {
-                                  $between: [ des_rgt, des_rgt + gap -1 ]
-                              }
-                          }
-                      })
-                    :
-                    Branch.update({
-                          rgt: sequelize.literal('"F_MI_Right" - ' + changed)
-                      }, {
-                          where: {
-                              lft: {
-                                  $between: [ des_rgt - gap, des_rgt]
-                              }
-                          }
-                    })
-              })
-              // 5.更新被影响节点的右值
-              .then(function () {
-                  return changed > 0 ?
-                      Branch.update({
-                          rgt: sequelize.literal('"F_MI_Right" + ' + gap)
-                      }, {
-                          where: {
-                              rgt: {
-                                  $and: [
-                                      {$lt: pre_rgt},
-                                      {$gte: des_rgt}
-                                  ]
-                              },
-                              lft: {
-                                  $notBetween: [des_rgt, des_rgt + gap - 1]
-                              }
-                          }
-                      })
-                      :
-                      Branch.update({
-                          rgt: sequelize.literal('"F_MI_Right" - ' + gap)
-                      }, {
-                          where: {
-                              rgt: {
-                                  $and: [
-                                      {$lt: des_rgt},
-                                      {$gt: pre_rgt}
-                                  ]
-                              },
-                              lft: {
-                                  $notBetween: [des_rgt - gap, des_rgt]
-                              }
-                          }
-                      })
-              })
+        return sequelize.transaction().then(function(t) {
+            return Branch.update({fatherId: desParentId}, {
+                     where: {
+                         id: id
+                     },
+                    transaction: t
+                 })
+                 .then(function () {
+                     return Branch.findById(id)
+                 })
+                 .then(function (result) {
+                     pre_lft = result.lft;
+                     pre_rgt = result.rgt;
+                     gap = pre_rgt - pre_lft + 1;
+                     return Branch.findById(desParentId)
+                 })
+                 // 2.更新子孙左值
+                 .then(function (result) {
+                     des_lft = result.lft;
+                     des_rgt = result.rgt;
+                     changed = pre_lft - des_rgt;
+                     changed = changed < 0 ? changed + gap : changed;
+                     return Branch.update({
+                         lft: sequelize.literal('"F_MI_Left" - ' + changed)
+                     }, {
+                         where: {
+                             lft: {
+                                 $between:[pre_lft, pre_rgts]
+                             }
+                         },
+                         transaction: t
+                     })
+                 })
+                 // 3.更新被影响节点的左值
+                 .then(function () {
+                     if( changed > 0 ){
+                         return Branch.update({
+                             lft: sequelize.literal('"F_MI_Left" + ' + gap)
+                         }, {
+                             where: {
+                                 lft: {
+                                     $and:[
+                                         {$gt: des_rgt},
+                                         {$lt: pre_lft}
+                                     ]
+                                 },
+                                 rgt: {
+                                     $or: [
+                                         {$gt: pre_rgt},
+                                         {$lt: pre_lft}
+                                     ]
+                                 }
+                             },
+                             transaction: t
+                         })
+                     }else{
+                         return Branch.update({
+                             lft: sequelize.literal('"F_MI_Left" - ' + gap)
+                         }, {
+                             where: {
+                                 lft: {
+                                     $and:[
+                                         {$gt: pre_rgt},
+                                         {$lt: des_rgt}
+                                     ]
+                                 },
+                                 rgt: {
+                                     $notBetween: [pre_lft, pre_rgt]
+                                 }
+                             },
+                             transaction: t
+                         })
+                     }
+                 })
+                 // 4.更新子节点右值
+                 .then(function () {
+                     return  changed > 0 ?
+                             Branch.update({
+                                 rgt: sequelize.literal('"F_MI_Right" - ' + changed)
+                             }, {
+                                 where: {
+                                     lft: {
+                                         $between: [ des_rgt, des_rgt + gap -1 ]
+                                     }
+                                 },
+                                 transaction: t
+                             })
+                         :
+                             Branch.update({
+                                 rgt: sequelize.literal('"F_MI_Right" - ' + changed)
+                             }, {
+                                 where: {
+                                     lft: {
+                                         $between: [ des_rgt - gap, des_rgt]
+                                     }
+                                 },
+                                 transaction: t
+                             })
+                 })
+                 // 5.更新被影响节点的右值
+                 .then(function () {
+                     return changed > 0 ?
+                            Branch.update({
+                                rgt: sequelize.literal('"F_MI_Right" + ' + gap)
+                            }, {
+                                where: {
+                                    rgt: {
+                                        $and: [
+                                            {$lt: pre_rgt},
+                                            {$gte: des_rgt}
+                                        ]
+                                    },
+                                    lft: {
+                                        $notBetween: [des_rgt, des_rgt + gap - 1]
+                                    }
+                                },
+                                transaction: t
+                            })
+                         :
+                            Branch.update({
+                                rgt: sequelize.literal('"F_MI_Right" - ' + gap)
+                            }, {
+                                where: {
+                                    rgt: {
+                                        $and: [
+                                            {$lt: des_rgt},
+                                            {$gt: pre_rgt}
+                                        ]
+                                    },
+                                    lft: {
+                                        $notBetween: [des_rgt - gap, des_rgt]
+                                    }
+                                },
+                                transaction: t
+                            })
+                 })
+                 .then( t.commit.bind(t) )
+                 .catch( t.rollback.bind(t) );
+        })
+
+
 
     },
-
 
     /*
      * 根据id变更节点信息

@@ -48,6 +48,7 @@ app.get('/getLayer', function(req, res, next) {
     });
 });
 
+
 // 获取所有节点
 app.get('/getAll', function(req, res, next) {
     moduleView.getAll().then(function(result){
