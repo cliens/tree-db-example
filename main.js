@@ -143,12 +143,21 @@ app.post('/updateNode', function(req, res, next){
 
 // 移动节点
 app.get('/moveNode', function(req, res, next){
-    moduleView.moveTo(req.query.id, req.query.newParentId).then(function() {
+    moduleView.moveTo(req.query.id, req.query.newParentId ).then(function() {
         res.send({status:'ok'});
     });
 });
 //moduleView.moveTo('81c768d1-d5e3-11e5-9006-41570f1ba434', 'dd00c040-d5e1-11e5-b366-b1e66d7850e6');
 
+// 同层平移
+app.get('/translation', function(req, res, next){
+    moduleView.translation(req.query.id, req.query.refId, req.query.forward).then(function() {
+        res.send({status:'ok'});
+    });
+});
+/*moduleView.translation('75f685e0-d9d5-11e5-81ff-415dcd7be236', '7b762570-d9d5-11e5-81ff-415dcd7be236',false).then(function() {
+    console.log('成功！');
+});*/
 
 // 删除节点
 app.get('/deleteById', function(req, res, next){

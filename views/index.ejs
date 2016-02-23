@@ -56,6 +56,15 @@
                 <!--<option value="">父节点</option>-->
             </select>
         </li>
+        <li>
+            <label for="translation">移动到</label>
+            <select name="" id="translationList">
+                <!--<option value="">父节点</option>-->
+            </select>
+            <label><input type="radio" name="moveDirection" value="true" checked="checked">之前</label>
+            <label><input type="radio" name="moveDirection" value="false">之后</label>
+            <input type="button" value="移动" id="translationBtn">
+        </li>
     </ul>
     <b>当前节点所有子孙点 <span id="childrenCount"></span>：</b>
     <p id="childrenShow">
@@ -158,6 +167,7 @@
             preV = tar;
             showChildren(tar);
             updateSelection(tar);
+            updateSiblingList(tar);
             $('#updateNodeText').val(tar.dataset.name);
         }
 
@@ -204,6 +214,25 @@
             }
         })
 
+    }
+
+    /*
+    * 更新兄弟节点列表
+    * @Para [ELEMENT] node DOM节点
+    * */
+    function updateSiblingList(node) {
+        $.ajax({
+            url:'getSibling?id=' + node.id,
+            methods: 'get',
+            success: function(list) {
+                var i = 0, len = list.length, tmp ='';
+                for(; i<len; i++){
+                    if(list[i].id == node.id) continue;
+                    tmp += '<option value="'+ list[i].id +'">' + list[i].name + '</option>'
+                }
+                $('#translationList').html(tmp);
+            }
+        })
     }
 
     // 移动节点
@@ -283,6 +312,18 @@
         })
 
     });
+
+    // 同层平移
+    $('#translationBtn').click(function() {
+        console.log();
+        $.ajax({
+            url:'translation?id=' + $('.active',tree).attr('id') + '&refId=' + $('#translationList').val() + '&forward=' + $('input[name="moveDirection"]:checked').val(),
+            type: 'get',
+            success: function(data) {
+                window.location.reload();
+            }
+        })
+    })
 
     // 阻止选择文本的默认行为
     tree.onselectstart = function() {
