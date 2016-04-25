@@ -2,38 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <style>
-        body{font-family: "微软雅黑"}
-        li {list-style: none}
-        input { line-height: 26px; margin: 5px 10px;}
-        #tree-show { width: 30%; float: left;}
-        #tree-show a{cursor: pointer; display: inline-block;}
-        #tree-show a.active{color: red}
-        #tree-show .active a{color: #000}
-        
-        #tree-ctrl { width: 40%; float: left; border: 1px solid #ccc;; height:600px; padding: 20px;}
-        #tree-ctrl input[type="button"]{ padding: 5px 10px;}
-        #childrenShow b { margin-right: 15px; color: #666666;}
-    </style>
+    <title>sequelize:基于左右值方案的属结构操作</title>
+    <link rel="stylesheet" href="../static/style/tree.css"/>
+    <link rel="stylesheet" href="../static/font/iconfont.css"/>
 </head>
 <body>
-<!--<form action="/addUser" method="post">
-    <ul>
-        <li> <h3>新增用户:</h3></li>
-        <li><input type="text" name="name" placeholder="姓名"></li>
-        <li><input type="submit" value="添加"></li>
-    </ul>
-</form>
-<form action="/addModule" method="post">
-    <ul>
-        <li> <h3>新增模块:</h3></li>
-        <li><input type="text" name="name" placeholder="模块名"></li>
-        <li><input type="submit" value="添加"></li>
-    </ul>
-</form>-->
 <div id="tree-show">
-    <h2>结构树：</h2>
+    <h3>结构树：</h3>
+    <ul>
+        <li>
+            <i class="iconfont">&#xe685</i>
+            <span class="title">我的电脑</span>
+            <ul>
+                <li>C盘</li>
+                <li>D盘</li>
+            </ul>
+        </li>
+        <li><i class="iconfont">&#xe684;</i></li>
+        <li></li>
+        <li></li>
+    </ul>
 </div>
 <div id="tree-ctrl">
     <ul>
@@ -41,14 +29,14 @@
             <input type="button" value="删除节点" id="deleteNode">
         </li>
         <li>
-            <label for="updateNode">更改节点名称</label>
-            <input type="text" id="updateNodeText">
-            <input type="button" id="updateNodeBtn" value="确定">
-        </li>
-        <li>
-            <label for="addNode">添加子节点</label>
+            <label for="addNodeName">添加节点</label>
             <input type="text" id="addNodeName">
             <input type="button" id="addNodeBtn" value="确定">
+        </li>
+        <li>
+            <label for="updateNodeText">更改节点名称</label>
+            <input type="text" id="updateNodeText">
+            <input type="button" id="updateNodeBtn" value="确定">
         </li>
         <li>
             <label for="moveNode">移动节点到</label>
@@ -57,7 +45,7 @@
             </select>
         </li>
         <li>
-            <label for="translation">移动到</label>
+            <label for="translationList">移动到</label>
             <select name="" id="translationList">
                 <!--<option value="">父节点</option>-->
             </select>
