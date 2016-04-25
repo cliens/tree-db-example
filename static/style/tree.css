@@ -3,6 +3,7 @@ body{font-family: "微软雅黑"; height: 100%;}
 li {list-style: none; background: #cccccc; border: 1px solid #f06431;}
 input { line-height: 26px; margin: 5px 10px;}
 
+
 #tree-show ,#tree-ctrl { width: 50%; padding: 2%; box-sizing: border-box; float: left; height: 96%; max-height: 96%;}
 #tree-show { border: 1px solid #eee; border-right: 0;}
 #tree-ctrl { border: 1px dashed #ccc;}
@@ -13,3 +14,6 @@ input { line-height: 26px; margin: 5px 10px;}
 
 #tree-ctrl input[type="button"]{ padding: 5px 10px;}
 #childrenShow b { margin-right: 15px; color: #666666;}
+
+#tree-show>ul>li { position: relative;}
+#tree-show li:before {content:''; position: absolute; left: 0; height: 20px; width: 100%;display: block; background: #ff0000;}
