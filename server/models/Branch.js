@@ -4,6 +4,7 @@
 
 var Sequelize = require('sequelize');
 var sequelize = require('../core/db');
+
 var Branch = module.exports = sequelize.define('module', {
 
     id: {
@@ -51,32 +52,7 @@ var Branch = module.exports = sequelize.define('module', {
     }
 
 }, {
-    tableName: 'T_ModuleInfo',
-    //getterMethods: {
-    //    layer: function() {
-    //        return Branch.count({
-    //            where:{
-    //                lft:{
-    //                    lte:this.lft
-    //                },
-    //                rgt:{
-    //                    gte:this.rgt
-    //                }
-    //            }
-    //        }).then(function(list) {
-    //            return list;
-    //        });
-    //    },
-    //    gap: function() {
-    //        return this.rgt - this.lft;
-    //    }
-    //},
-    //setterMethods: {
-    //    gap: function () {
-    //        this.setDataValue('gap', this.rgt - this.lft);
-    //    }
-    //}
-
+    tableName: 'T_ModuleInfo'
 });
 
 

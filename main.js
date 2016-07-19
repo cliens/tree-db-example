@@ -63,9 +63,7 @@ app.get('/getChildren', function(req, res, next) {
         res.json(result);
     });
 });
-/*moduleView.getChildrenById('ef32a620-d5e1-11e5-a0a7-91805fbb8df5').then(function(result){
-    console.log(result);
-});*/
+
 
 // 获取所有子节点
 app.get('/getChild', function(req, res, next) {
@@ -73,9 +71,6 @@ app.get('/getChild', function(req, res, next) {
         res.json(result);
     });
 });
-/*moduleView.getChildById(2).then(function(result){
-    console.log(result);
-});*/
 
 
 // 获取叶子节点
@@ -84,9 +79,6 @@ app.get('/getLeaf', function(req, res, next) {
         res.json(result);
     });
 });
-/*moduleView.getLeafById(4).then(function(result){
-   console.log(result);
-});*/
 
 
 // 获取同级节点
@@ -95,9 +87,6 @@ app.get('/getSibling', function(req, res, next) {
         res.json(result);
     });
 });
-/*moduleView.getSiblingById(5).then(function(result){
-    console.log(result);
-});*/
 
 
 // 获取非当前节点父节点下的节点，用于移动节点
@@ -129,8 +118,6 @@ app.post('/addModule', function(req, res, next){
         }) ;
     }
 });
-//moduleView.insertChild('38a55ae0-d557-11e5-a270-a3aedd6430b8',{name:'F:'});
-//moduleView.insertRoot({name:'公司'});
 
 
 // 更改节点信息
@@ -147,7 +134,6 @@ app.get('/moveNode', function(req, res, next){
         res.send({status:'ok'});
     });
 });
-//moduleView.moveTo('81c768d1-d5e3-11e5-9006-41570f1ba434', 'dd00c040-d5e1-11e5-b366-b1e66d7850e6');
 
 // 同层平移
 app.get('/translation', function(req, res, next){
@@ -155,9 +141,6 @@ app.get('/translation', function(req, res, next){
         res.send({status:'ok'});
     });
 });
-/*moduleView.translation('75f685e0-d9d5-11e5-81ff-415dcd7be236', '7b762570-d9d5-11e5-81ff-415dcd7be236',false).then(function() {
-    console.log('成功！');
-});*/
 
 // 删除节点
 app.get('/deleteById', function(req, res, next){
@@ -165,7 +148,6 @@ app.get('/deleteById', function(req, res, next){
         res.send({status:'ok'});
     });
 });
-//moduleView.deleteById('17825fd1-d5e7-11e5-a96a-2be7074c0884');
 
 
 // 端口监听
@@ -175,13 +157,8 @@ var server = app.listen(3000, function(){
 
 
 // 是否强制刷新数据库
-/*var sequelize = require('./server/core/db');
+/*
+var sequelize = require('./server/core/db');
 var Branch = require('./server/models/Branch');
-sequelize.sync({force:true}).done(function(){
-    User.create({name:'cliens'});
-    var len = initData.length;
-/!*    for(var i= 0; i < len;i++){
-        Branch.create(initData[i]);
-    }*!/
-    Branch.create(initData[0]);
-});*/
+sequelize.sync({force:true})
+*/
